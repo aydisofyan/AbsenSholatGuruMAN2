@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Absen Sholat - MAN 2</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #10b981;
+            /* Emerald 500 */
+            --error-color: #ef4444;
+            /* Red 500 */
+            --bg-gradient-start: #0f172a;
+            /* Slate 900 */
+            --bg-gradient-end: #1e293b;
+            /* Slate 800 */
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-color: #ffffff;
+            --text-secondary: #94a3b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+            color: var(--text-color);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Ambient Background Animation */
+        .ambient-light {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.2) 0%, rgba(0, 0, 0, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: pulse-glow 8s infinite alternate;
+        }
+
+        @keyframes pulse-glow {
+            0% {
+                transform: translate(-50%, -50%) scale(0.8);
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1.2);
+                opacity: 0.8;
+            }
+        }
+
+        /* Glassmorphism Card */
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 3rem;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transform: translateY(20px);
+            opacity: 0;
+            animation: slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            position: relative;
+            z-index: 10;
+        }
+
+        @keyframes slide-up {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Clock & Date */
+        .clock-container {
+            margin-bottom: 2rem;
+        }
+
+        .time {
+            font-size: 3.5rem;
+            font-weight: 700;
+            letter-spacing: -0.05em;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .date {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+            margin-top: 0.25rem;
+        }
+
+        /* Status Indicator */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        .status-badge.open {
+            color: #34d399;
+        }
+
+        .status-badge.open .dot {
+            background-color: #34d399;
+            box-shadow: 0 0 10px #34d399;
+        }
+
+        .status-badge.closed {
+            color: #f87171;
+        }
+
+        .status-badge.closed .dot {
+            background-color: #f87171;
+            box-shadow: 0 0 10px #f87171;
+        }
+
+        /* Main Content */
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+
+        p.description {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        /* Redirect Loader */
+        .loader {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1.5rem;
+            display: none;
+            /* Hidden by default */
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 2rem;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="ambient-light"></div>
+
+    <div class="card">
+        <div class="clock-container">
+            <div class="time" id="timeDisplay">--:--</div>
+            <div class="date" id="dateDisplay">Memuat tanggal...</div>
+        </div>
+
+        <div id="statusBadge" class="status-badge closed">
+            <span class="dot"></span>
+            <span id="statusText">Memeriksa Jadwal...</span>
+        </div>
+
+        <div id="contentOpen" style="display: none;">
+            <div class="loader" style="display: block;"></div>
+            <h1>Absensi Sholat Dibuka</h1>
+            <p class="description">Anda akan dialihkan ke formulir absensi dalam beberapa detik...</p>
+        </div>
+
+        <div id="contentClosed" style="display: block;">
+            <h1>Absensi Ditutup</h1>
+            <p class="description">Maaf, akses absensi hanya dibuka pada pukul <br> <strong style="color: #fff;">11:00 -
+                    13:00 WIB</strong>.</p>
+        </div>
+
+        <div class="footer">
+            Sistem Absen Sholat Guru MAN 2
+        </div>
+    </div>
+
+    <script>
+        const REDIRECT_URL = "https://bit.ly/AbsenSholatGuruMAN2";
+        const OPEN_HOUR = 11;
+        const CLOSE_HOUR = 13;
+
+        function updateClock() {
+            const now = new Date();
+
+            // Format Time HH:MM:SS
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('timeDisplay').innerText = `${hours}:${minutes}:${seconds}`;
+
+            // Format Date (e.g., Senin, 22 Januari 2026)
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Jakarta' };
+            const dateStr = now.toLocaleDateString('id-ID', options);
+            document.getElementById('dateDisplay').innerText = dateStr;
+
+            // Check Status
+            const currentHour = now.getHours();
+            const isOpen = currentHour >= OPEN_HOUR && currentHour < CLOSE_HOUR;
+
+            updateUI(isOpen);
+        }
+
+        function updateUI(isOpen) {
+            const statusBadge = document.getElementById('statusBadge');
+            const statusText = document.getElementById('statusText');
+            const contentOpen = document.getElementById('contentOpen');
+            const contentClosed = document.getElementById('contentClosed');
+
+            if (isOpen) {
+                // Remove closed class first to ensure clean state
+                statusBadge.classList.remove('closed');
+                statusBadge.classList.add('open');
+                statusText.innerText = "Sesi Aktif";
+
+                contentClosed.style.display = 'none';
+                contentOpen.style.display = 'block';
+
+                // Prevent infinite redirect loops if something goes wrong, 
+                // but for this simple script, we just redirect.
+                // We add a small delay so the user sees the "success" state first.
+                if (!window.hasRedirected) {
+                    window.hasRedirected = true;
+                    setTimeout(() => {
+                        window.location.href = REDIRECT_URL;
+                    }, 2000);
+                }
+
+            } else {
+                statusBadge.classList.remove('open');
+                statusBadge.classList.add('closed');
+                statusText.innerText = "Sesi Ditutup";
+
+                contentOpen.style.display = 'none';
+                contentClosed.style.display = 'block';
+            }
+        }
+
+        // Initialize immediately
+        updateClock();
+
+        // Update every second
+        setInterval(updateClock, 1000);
+
+    </script>
+</body>
+
+</html>
